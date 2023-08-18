@@ -1,0 +1,40 @@
+To configure the DHCP the following commands can be executed:
+
+/*Configure the Router R1 (Boundary router) for Fast-Ethernet interface (Fa0/0) and Serial Interface (Ser2/0)*/
+Router 1 (Configuration)# interface FastEthernet0/0
+Router 1 (Configuration-if)#  ip address 192.168.10.1 255.255.255.0
+Router 1 (Configuration-if)# no shutdown
+
+Router 1 (Configuration)# interface Serial2/0
+Router 1 (Configuration-if)# ip address 209.165.200.225 255.255.255.224
+
+/* Configure the Router R0 (ISP) for Serial Interface (Ser2/0) */
+Router 0 (Configuration)# interface Serial3/0
+Router 0 (Configuration-if)#  ip address 209.165.200.226 255.255.255.224
+
+/* Define static root on ISP router */
+! For accessing the network 192.168.10.0/24
+Router 0 (Configuration)# ip route 192.168.10.0 255.255.255.0 Serial2/0
+
+/* Define default root on Router R1 (Boundary router) */
+! For accessing the internet from network 192.168.10.0/24
+Router 1 (Configuration)# ip route 0.0.0.0 0.0.0.0 Serial2/0
+
+
+/* Configure NAT configuration on Router R1 (Boundary Router) */
+! Define address range for the NAT pool
+Router 1 (Configuration)#  ip nat pool NAT_POOL1 209.165.200.226 209.165.200.240 netmask 255.255.255.224
+! Define ACL to permit the hosts; 0.0.0.255 is the super netting of mask
+Router 1 (Configuration)# ip access-list standard ACL1
+Router 1 (Configuration)# Permit 192.168.10.0 0.0.0.255
+! Bound the ACL to the NAT pool
+Router 1 (Configuration)#  ip nat inside source list ACL1 pool NAT_POOL1 overload
+! Define the inside interface of the router for the NAT
+Router 1 (Configuration)# interface fa0/0
+Router 1 (Interface)# ip nat inside
+Router 1 (Interface)# no shutdown
+Router 1 (Interface)# exit
+! Define the outside interface of the router for the NAT
+Router 1 (Configuration)# interface ser2/0
+Router 1 (Interface)# ip nat outside
+Router 1 (Interface)# no shutdown
