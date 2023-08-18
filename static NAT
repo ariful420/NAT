@@ -37,3 +37,48 @@ Router 1 (Interface)# no shutdown
 
 #To verify the NAT configuration
 Show ip nat statistics
+
+
+
+
+
+
+
+
+///// alternatives
+Router R0 (ISP) Configuration:
+Router(config)# interface Serial3/0
+Router(config-if)# ip address 209.165.200.226 255.255.255.224
+Router(config-if)# no shutdown
+Router(config-if)# exit
+
+Router(config)# ip route 192.168.10.0 255.255.255.0 Serial3/0
+Router R1 (Boundary Router) Configuration:
+Router(config)# interface FastEthernet0/0
+Router(config-if)# ip address 192.168.10.1 255.255.255.0
+Router(config-if)# no shutdown
+Router(config-if)# exit
+
+Router(config)# interface Serial2/0
+Router(config-if)# ip address 209.165.200.225 255.255.255.224
+Router(config-if)# clock rate 64000
+Router(config-if)# no shutdown
+Router(config-if)# exit
+
+Router(config)# ip route 0.0.0.0 0.0.0.0 Serial2/0
+
+Router(config)# ip nat inside source static 192.168.10.2 209.165.200.227
+Router(config)# ip nat inside source static 192.168.10.3 209.165.200.228
+
+Router(config)# interface FastEthernet0/0
+Router(config-if)# ip nat inside
+Router(config-if)# no shutdown
+Router(config-if)# exit
+
+Router(config)# interface Serial2/0
+Router(config-if)# ip nat outside
+Router(config-if)# no shutdown
+Router(config-if)# exit
+NAT Configuration Verification:
+Router# show ip nat translations
+Router# show ip nat statistics
