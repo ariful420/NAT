@@ -38,3 +38,43 @@ Router 1 (Interface)# exit
 Router 1 (Configuration)# interface ser2/0
 Router 1 (Interface)# ip nat outside
 Router 1 (Interface)# no shutdown
+
+
+
+
+
+// alternatives
+Router R0 (ISP) Configuration:
+Router(config)# interface Serial3/0
+Router(config-if)# ip address 209.165.200.226 255.255.255.224
+Router(config-if)# no shutdown
+
+Router(config)# ip route 192.168.10.0 255.255.255.0 Serial3/0
+Router R1 (Boundary Router) Configuration:
+Router(config)# interface FastEthernet0/0
+Router(config-if)# ip address 192.168.10.1 255.255.255.0
+Router(config-if)# no shutdown
+
+Router(config)# interface Serial2/0
+Router(config-if)# ip address 209.165.200.225 255.255.255.224
+Router(config-if)# clock rate 64000
+Router(config-if)# no shutdown
+
+Router(config)# ip route 0.0.0.0 0.0.0.0 Serial2/0
+
+Router(config)# ip nat pool NAT_POOL1 209.165.200.226 209.165.200.240 netmask 255.255.255.224
+
+Router(config)# ip access-list standard ACL1
+Router(config-std-nacl)# permit 192.168.10.0 0.0.0.255
+
+Router(config)# ip nat inside source list ACL1 pool NAT_POOL1 overload
+
+Router(config)# interface FastEthernet0/0
+Router(config-if)# ip nat inside
+Router(config-if)# no shutdown
+
+Router(config)# interface Serial2/0
+Router(config-if)# ip nat outside
+Router(config-if)# no shutdown
+
+
